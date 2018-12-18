@@ -20,6 +20,7 @@ import sprite.player.Archer;
 import sprite.player.Warrior;
 import sprite.player.Wizard;
 import utilities.AudioPlayer;
+import utilities.QueueExitAnimation;
 
 public class GameManager {
 	private static GameManager instance = new GameManager();
@@ -40,7 +41,8 @@ public class GameManager {
 			new Map_StageBoss() };
 
 	private Queue<HealthEntity> turnQueue = new LinkedList<>();
-
+	private ArrayList<Integer> animList = new ArrayList<>();
+	private ArrayList<QueueExitAnimation> exitAnimList = new ArrayList<>();
 	private ArrayList<HealthEntity> enemies = new ArrayList<>();
 	private ArrayList<HealthEntity> friends = new ArrayList<>();
 
@@ -58,12 +60,20 @@ public class GameManager {
 	public void addToQueue(HealthEntity e) {
 		System.out.println("Queue add " + e.getName());
 		turnQueue.add(e);
+		animList.add(64); // TODO: better value
 		System.out.println("Queue Size = " + turnQueue.size());
 		e.setInQueue(true);
 	}
 
 	public void nextQueue() {
-		turnQueue.poll();
+		HealthEntity character  = turnQueue.poll();
+		
+		int last = animList.get(0);
+		animList.remove(0);
+		if (animList.size() > 0)
+			animList.set(0, last+80); // 80 = CHAR_SIZE+16;
+		exitAnimList.add(new QueueExitAnimation(character, last, 0));
+		LogicLoop.getInstance().setQueueCooldown(50);
 	}
 
 	public HealthEntity getTopQueue() {
@@ -123,6 +133,8 @@ public class GameManager {
 				System.out.println("Logic stop");
 
 				this.turnQueue.clear();
+				this.animList.clear();
+				this.exitAnimList.clear();
 				System.out.println("Queue Clear = " + turnQueue.size());
 
 				// Update Stats
@@ -228,6 +240,25 @@ public class GameManager {
 
 	public HealthEntity getFriend(int targetNo) {
 		return friends.get(targetNo);
+	}
+	
+	
+	
+
+	public ArrayList<QueueExitAnimation> getExitAnimList() {
+		return exitAnimList;
+	}
+
+	public void setExitAnimList(ArrayList<QueueExitAnimation> exitAnimList) {
+		this.exitAnimList = exitAnimList;
+	}
+
+	public Queue<HealthEntity> getTurnQueue() {
+		return turnQueue;
+	}
+
+	public ArrayList<Integer> getAnimList() {
+		return animList;
 	}
 
 	public int getTargetNo() {

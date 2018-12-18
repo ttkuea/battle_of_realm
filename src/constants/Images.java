@@ -138,6 +138,7 @@ public class Images{
 	public static final Image wizard1Particle = new Image(ClassLoader.getSystemResource("Images_Particle/Wizard_Skill_1.png").toString(),100,100,true,false);
 	public static final Image wizard2Particle = new Image(ClassLoader.getSystemResource("Images_Particle/Wizard_Skill_2.png").toString(),100,100,true,false);
 	public static final Image wizardHealParticle = new Image(ClassLoader.getSystemResource("Images_Particle/Wizard_Heal.png").toString(),100,100,true,false);
+	public static final Image circleParticle = new Image(ClassLoader.getSystemResource("Images_Particle/Circle.png").toString(),160,160,true,false);
 	
 	public static void loadImages() {
 		Collections.addAll(lavaIdles, lavaIdle1, lavaIdle2);

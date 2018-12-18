@@ -67,6 +67,10 @@ public class Enemy extends HealthEntity {
 		}
 	}
 
+	public ArrayList<Image> getIdleImagesList() { // for rendering icom
+		return idleImagesList;
+	}
+	
 	@Override
 	public ArrayList<Image> getSkillIcon() {
 		return null;
