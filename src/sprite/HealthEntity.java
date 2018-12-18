@@ -38,6 +38,8 @@ public abstract class HealthEntity extends Entity {
 
 	public abstract void setState(int state);
 
+	public abstract ArrayList<Image> getIdleImagesList(); // every character should have idle image
+	
 	public void update() {
 		if (this.isDead()) {
 			this.visible = false;

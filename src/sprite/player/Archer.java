@@ -122,6 +122,12 @@ public class Archer extends HealthEntity {
 		this.state = state;
 	}
 
+	
+	
+	public ArrayList<Image> getIdleImagesList() { // for rendering icom
+		return idleImagesList;
+	}
+
 	public void updateStat(int[] stats) {
 		this.setMAXHP(stats[0]);
 		this.setCurrentHP(stats[0]);

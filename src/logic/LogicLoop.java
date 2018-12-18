@@ -1,10 +1,13 @@
 package logic;
 
+import java.util.ArrayList;
+
 import SharedObject.RenderableHolder;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import main.Main;
+import particle.CircleParticle;
 import particle.NormalParticle;
 import sprite.HealthEntity;
 import sprite.enemy.Enemy;
@@ -12,6 +15,7 @@ import sprite.player.Archer;
 import sprite.player.Warrior;
 import sprite.player.Wizard;
 import utilities.AudioPlayer;
+import utilities.QueueExitAnimation;
 import utilities.Random;
 
 public class LogicLoop {
@@ -26,7 +30,7 @@ public class LogicLoop {
 	private Warrior warrior = GameManager.getInstance().getWarrior();
 	private Wizard wizard = GameManager.getInstance().getWizard();
 	private Archer archer = GameManager.getInstance().getArcher();
-
+	private int queueCooldown = 0;
 	public LogicLoop() {
 		logicLoop = new Timeline(new KeyFrame(Duration.seconds(1. / 60), e -> {
 			if (shouldRun) {	
@@ -41,9 +45,35 @@ public class LogicLoop {
 	public void update() {
 		RenderableHolder.getInstance().update();
 		updateATB();
-		callQueue();
+		updateQueueAnim();
+		if (queueCooldown == 0) {
+			callQueue();			
+		}
+		else {
+			queueCooldown--;
+		}
 	}
 	
+	
+	
+	private void updateQueueAnim() {
+		ArrayList<Integer> anim = GameManager.getInstance().getAnimList();
+		for (int i=0; i<anim.size(); ++i) {
+			if (anim.get(i) > 0)
+				anim.set(i, anim.get(i) - 1);
+		}
+		// TODO: change num
+		ArrayList<QueueExitAnimation> exitAnim = GameManager.getInstance().getExitAnimList();
+		for (int i=0; i<exitAnim.size(); ++i) {
+			QueueExitAnimation fp =  exitAnim.get(i);
+			fp.yPos+=3;
+			if (fp.yPos > 128) {
+				exitAnim.remove(i);
+				--i;
+			}
+		}
+	}
+
 	public void updateATB() {
 		if (!warrior.isATBFull())
 			if (!warrior.isDead()) warrior.setCurrentATB(warrior.getCurrentATB() + (warrior.getSpeed()*.02));
@@ -98,7 +128,7 @@ public class LogicLoop {
 		if (GameManager.getInstance().canCallQueue()) {
 			
 			currentTurn = GameManager.getInstance().getTopQueue();
-			
+
 			if (currentTurn instanceof Warrior || currentTurn instanceof Wizard || currentTurn instanceof Archer) {
 				Main.getGameScreen().setSkillVisible(true);
 				Main.getGameScreen().setSkills(currentTurn.getSkillIcon());
@@ -122,6 +152,7 @@ public class LogicLoop {
 					currentTurn.setCurrentATB(0);
 					currentTurn.setInQueue(false);	
 					System.out.println(currentTurn.getName() + " Attack->"+GameManager.getInstance().getFriend(pos));
+					RenderableHolder.getInstance().add(new CircleParticle((int)(currentTurn.getX()-30), (int)(currentTurn.getY()-30)));
 				}
 				
 				GameManager.getInstance().nextQueue();
@@ -143,6 +174,16 @@ public class LogicLoop {
 
 	public boolean isShouldRun() {
 		return shouldRun;
+	}
+
+	
+	
+	public int getQueueCooldown() {
+		return queueCooldown;
+	}
+
+	public void setQueueCooldown(int queueCooldown) {
+		this.queueCooldown = queueCooldown;
 	}
 
 	public void setShouldRun(boolean shouldRun) {
