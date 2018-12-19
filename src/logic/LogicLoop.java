@@ -1,9 +1,11 @@
 package logic;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 import com.sun.xml.internal.ws.api.pipe.helper.PipeAdapter;
 
 import SharedObject.RenderableHolder;
@@ -63,6 +65,32 @@ public class LogicLoop {
 	
 	PriorityQueue<Pair<Double, HealthEntity>> temp_q = new PriorityQueue<>();; 
 	public void updateQueue() {
+		ArrayList<Integer> animList = GameManager.getInstance().getAnimList();
+		ArrayList<QueueExitAnimation> exitAnim = GameManager.getInstance().getExitAnimList();
+		Queue<HealthEntity> turnQueue = GameManager.getInstance().getTurnQueue();
+		Iterator<HealthEntity> it = turnQueue.iterator();
+		ArrayList<HealthEntity> deadList = new ArrayList<>(); // deferred removal
+		double pos = 0;
+		for (int i=0; i<animList.size(); ++i) {
+			HealthEntity cur = it.next();
+			if (cur.isDead()) {
+				int last = animList.get(i);
+				animList.remove(i); // remove from queue
+				if (animList.size() > i) { // has index `i`
+					animList.set(i, animList.get(i)+last+80); // make space for next queue
+				}
+				--i;
+				deadList.add(cur); // defer delete
+				exitAnim.add(new QueueExitAnimation(cur, pos+last, 0)); // add remove anim
+			}
+			else {
+				pos += animList.get(i)+80;
+			}
+		}
+		for (HealthEntity d: deadList)
+			turnQueue.remove(d);
+		
+		
 		temp_q.clear();
 		ArrayList<HealthEntity> friends = GameManager.getInstance().getFriends();
 		ArrayList<HealthEntity> enemies = GameManager.getInstance().getEnemies();
