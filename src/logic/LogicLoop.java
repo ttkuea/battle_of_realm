@@ -98,12 +98,12 @@ public class LogicLoop {
 		for (HealthEntity f: friends) {
 			if (f.isDead()) continue;
 			for (int i=1; i<=10; i++) 
-				temp_q.add(new Pair<Double, HealthEntity>(f.getMAXATB()*(f.getTurnCount()+i), f));				
+				temp_q.add(new Pair<Double, HealthEntity>(f.getMAXATB()/f.getSpeed()*(f.getTurnCount()+i), f));				
 		}
 		for (HealthEntity e: enemies) {
 			if (e.isDead()) continue; 
 			for (int i=1; i<=10; i++) 
-				temp_q.add(new Pair<Double, HealthEntity>(e.getMAXATB()*(e.getTurnCount()+i), e));
+				temp_q.add(new Pair<Double, HealthEntity>(e.getMAXATB()/e.getSpeed()*(e.getTurnCount()+i), e));
 		}
 		
 		Queue<HealthEntity> q = GameManager.getInstance().getTurnQueue();

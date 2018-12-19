@@ -7,6 +7,7 @@ import java.util.Queue;
 import SharedObject.RenderableHolder;
 import constants.Constant;
 import main.Main;
+import skill.Skill;
 import UI.map.Map;
 import UI.map.Map_Stage1;
 import UI.map.Map_Stage2;
@@ -74,8 +75,9 @@ public class GameManager {
 		if (animList.size() > 0)
 			animList.set(0, last+Constant.queueGridSize );
 		exitAnimList.add(new QueueExitAnimation(character, last, 0));
-		if (character instanceof Enemy) // don't delay on friendly attack
-			LogicLoop.getInstance().setQueueCooldown(50);
+		for (Skill skill: character.getSkillList())
+			skill.reduceCooldown();
+		LogicLoop.getInstance().setQueueCooldown(50);
 	}
 
 	public HealthEntity getTopQueue() {
