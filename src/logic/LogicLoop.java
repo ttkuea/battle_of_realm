@@ -1,6 +1,10 @@
 package logic;
 
 import java.util.ArrayList;
+import java.util.PriorityQueue;
+import java.util.Queue;
+
+import com.sun.xml.internal.ws.api.pipe.helper.PipeAdapter;
 
 import SharedObject.RenderableHolder;
 import javafx.animation.KeyFrame;
@@ -17,6 +21,8 @@ import sprite.player.Wizard;
 import utilities.AudioPlayer;
 import utilities.QueueExitAnimation;
 import utilities.Random;
+import utilities.cpp;
+import utilities.cpp.Pair;
 
 public class LogicLoop {
 	private static LogicLoop instance = new LogicLoop();
@@ -44,7 +50,8 @@ public class LogicLoop {
 
 	public void update() {
 		RenderableHolder.getInstance().update();
-		updateATB();
+		updateQueue();
+//		updateATB(); // delet this later
 		updateQueueAnim();
 		if (queueCooldown == 0) {
 			callQueue();			
@@ -54,13 +61,36 @@ public class LogicLoop {
 		}
 	}
 	
-	
+	PriorityQueue<Pair<Double, HealthEntity>> temp_q = new PriorityQueue<>();; 
+	public void updateQueue() {
+		temp_q.clear();
+		ArrayList<HealthEntity> friends = GameManager.getInstance().getFriends();
+		ArrayList<HealthEntity> enemies = GameManager.getInstance().getEnemies();
+		for (HealthEntity f: friends) {
+			if (f.isDead()) continue;
+			for (int i=1; i<=10; i++) 
+				temp_q.add(new Pair<Double, HealthEntity>(f.getMAXATB()*(f.getTurnCount()+i), f));				
+		}
+		for (HealthEntity e: enemies) {
+			if (e.isDead()) continue; 
+			for (int i=1; i<=10; i++) 
+				temp_q.add(new Pair<Double, HealthEntity>(e.getMAXATB()*(e.getTurnCount()+i), e));
+		}
+		
+		Queue<HealthEntity> q = GameManager.getInstance().getTurnQueue();
+		while (q.size() < 10) { // desired length
+			Pair<Double, HealthEntity> top = temp_q.poll();
+			System.out.printf("top is %s = %.2f\n", top.second.getClass().getSimpleName(), top.first);
+			GameManager.getInstance().addToQueue(top.second);
+			top.second.increaseTurnCount();
+		}
+	}
 	
 	private void updateQueueAnim() {
 		ArrayList<Integer> anim = GameManager.getInstance().getAnimList();
 		for (int i=0; i<anim.size(); ++i) {
 			if (anim.get(i) > 0)
-				anim.set(i, anim.get(i) - 1);
+				anim.set(i, anim.get(i) - 5);
 		}
 		// TODO: change num
 		ArrayList<QueueExitAnimation> exitAnim = GameManager.getInstance().getExitAnimList();
@@ -73,7 +103,7 @@ public class LogicLoop {
 			}
 		}
 	}
-
+	/*
 	public void updateATB() {
 		if (!warrior.isATBFull())
 			if (!warrior.isDead()) warrior.setCurrentATB(warrior.getCurrentATB() + (warrior.getSpeed()*.02));
@@ -123,6 +153,7 @@ public class LogicLoop {
 		}
 		
 	}
+	*/
 	
 	public void callQueue() {
 		if (GameManager.getInstance().canCallQueue()) {

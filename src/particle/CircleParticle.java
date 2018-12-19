@@ -6,7 +6,7 @@ import javafx.scene.canvas.GraphicsContext;
 
 public class CircleParticle implements IRenderable {
 	private int visibleTick = 0;
-	private int maxVisibleTick = 10;
+	private int maxVisibleTick = 20;
 
 	private int x;
 	private int y;
@@ -40,7 +40,7 @@ public class CircleParticle implements IRenderable {
 	public void draw(GraphicsContext gc) {
 		if (isVisible()) {
 			gc.save();
-			gc.setGlobalAlpha(1-visibleTick/10.);
+			gc.setGlobalAlpha(1.-(double)visibleTick/maxVisibleTick);
 			visibleTick++;
 			gc.drawImage(Images.circleParticle, x, y);
 			gc.restore();

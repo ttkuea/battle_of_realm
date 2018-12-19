@@ -42,12 +42,6 @@ public class RenderLoop {
 				tmp.get(i).draw(gc);
 			}
 		}
-		if (LogicLoop.getInstance().getQueueCooldown() > 0) {
-			gc.save();
-			gc.setFill(Color.RED);
-			gc.fillRect(0, 450, 40, 40);
-			gc.restore();
-		}
 		ArrayList<Integer> anim = GameManager.getInstance().getAnimList();
 		double pos = 0;
 		final double CHAR_SIZE = 64;
