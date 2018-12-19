@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import SharedObject.IRenderable;
 import SharedObject.RenderableHolder;
+import constants.Constant;
 import constants.Images;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -44,21 +45,20 @@ public class RenderLoop {
 		}
 		ArrayList<Integer> anim = GameManager.getInstance().getAnimList();
 		double pos = 0;
-		final double CHAR_SIZE = 64;
 		Iterator<HealthEntity> it = GameManager.getInstance().getTurnQueue().iterator();
 		for (int i=0; i<anim.size(); i++) {
 			pos += anim.get(i);
 			HealthEntity next = it.next();
-			gc.drawImage(next.getIdleImagesList().get(0), pos, 450, CHAR_SIZE, CHAR_SIZE);
-			pos += CHAR_SIZE+16;
+			gc.drawImage(next.getIdleImagesList().get(0), pos, 450, Constant.queueIconSize, Constant.queueIconSize);
+			pos += Constant.queueGridSize;
 		}
 		pos = 0;
 		ArrayList<QueueExitAnimation> exitAnim = GameManager.getInstance().getExitAnimList();
 		for (QueueExitAnimation fp: exitAnim) {
 			pos += fp.xPos;
 			HealthEntity character = fp.character;
-			gc.drawImage(character.getIdleImagesList().get(0), fp.xPos, 450+fp.yPos, CHAR_SIZE, CHAR_SIZE);
-			pos += CHAR_SIZE+16;
+			gc.drawImage(character.getIdleImagesList().get(0), fp.xPos, 450+fp.yPos, Constant.queueIconSize, Constant.queueIconSize);
+			pos += Constant.queueGridSize;
 		}
 	}
 	

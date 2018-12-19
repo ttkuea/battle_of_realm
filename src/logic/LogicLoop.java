@@ -9,6 +9,7 @@ import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 import com.sun.xml.internal.ws.api.pipe.helper.PipeAdapter;
 
 import SharedObject.RenderableHolder;
+import constants.Constant;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
@@ -77,14 +78,14 @@ public class LogicLoop {
 				int last = animList.get(i);
 				animList.remove(i); // remove from queue
 				if (animList.size() > i) { // has index `i`
-					animList.set(i, animList.get(i)+last+80); // make space for next queue
+					animList.set(i, animList.get(i)+last+Constant.queueGridSize); // make space for next queue
 				}
 				--i;
 				deadList.add(cur); // defer delete
 				exitAnim.add(new QueueExitAnimation(cur, pos+last, 0)); // add remove anim
 			}
 			else {
-				pos += animList.get(i)+80;
+				pos += animList.get(i)+Constant.queueGridSize;
 			}
 		}
 		for (HealthEntity d: deadList)
@@ -118,13 +119,13 @@ public class LogicLoop {
 		ArrayList<Integer> anim = GameManager.getInstance().getAnimList();
 		for (int i=0; i<anim.size(); ++i) {
 			if (anim.get(i) > 0)
-				anim.set(i, anim.get(i) - 5);
+				anim.set(i, anim.get(i) - Constant.queuePushDownSpeed);
 		}
 		// TODO: change num
 		ArrayList<QueueExitAnimation> exitAnim = GameManager.getInstance().getExitAnimList();
 		for (int i=0; i<exitAnim.size(); ++i) {
 			QueueExitAnimation fp =  exitAnim.get(i);
-			fp.yPos+=3;
+			fp.yPos+=Constant.queuePushDownSpeed;
 			if (fp.yPos > 128) {
 				exitAnim.remove(i);
 				--i;

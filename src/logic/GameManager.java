@@ -61,7 +61,7 @@ public class GameManager {
 	public void addToQueue(HealthEntity e) {
 		System.out.println("Queue add " + e.getName());
 		turnQueue.add(e);
-		animList.add(64); // TODO: better value
+		animList.add(Constant.queueEntrySpacing);
 		System.out.println("Queue Size = " + turnQueue.size());
 		e.setInQueue(true);
 	}
@@ -72,7 +72,7 @@ public class GameManager {
 		int last = animList.get(0);
 		animList.remove(0);
 		if (animList.size() > 0)
-			animList.set(0, last+80); // 80 = CHAR_SIZE+16;
+			animList.set(0, last+Constant.queueGridSize );
 		exitAnimList.add(new QueueExitAnimation(character, last, 0));
 		if (character instanceof Enemy) // don't delay on friendly attack
 			LogicLoop.getInstance().setQueueCooldown(50);
