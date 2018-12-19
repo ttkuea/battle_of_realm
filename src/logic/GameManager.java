@@ -16,6 +16,7 @@ import UI.map.Map_Stage5;
 import UI.map.Map_StageBoss;
 import UI.statusbar.StatusBar;
 import sprite.HealthEntity;
+import sprite.enemy.Enemy;
 import sprite.player.Archer;
 import sprite.player.Warrior;
 import sprite.player.Wizard;
@@ -73,7 +74,8 @@ public class GameManager {
 		if (animList.size() > 0)
 			animList.set(0, last+80); // 80 = CHAR_SIZE+16;
 		exitAnimList.add(new QueueExitAnimation(character, last, 0));
-		LogicLoop.getInstance().setQueueCooldown(50);
+		if (character instanceof Enemy) // don't delay on friendly attack
+			LogicLoop.getInstance().setQueueCooldown(50);
 	}
 
 	public HealthEntity getTopQueue() {
@@ -132,19 +134,14 @@ public class GameManager {
 				LogicLoop.getInstance().setShouldRun(false);
 				System.out.println("Logic stop");
 
-				this.turnQueue.clear();
-				this.animList.clear();
-				this.exitAnimList.clear();
-				System.out.println("Queue Clear = " + turnQueue.size());
-
+				resetQueue();
+				
 				// Update Stats
 				warrior.updateStat(Constant.warriorStat[stageNumber]);
 				wizard.updateStat(Constant.wizardStat[stageNumber]);
 				archer.updateStat(Constant.archerStat[stageNumber]);
 
-				warrior.setInQueue(false);
-				wizard.setInQueue(false);
-				archer.setInQueue(false);
+				
 
 				Main.getGameScreen().setSkillVisible(false);
 
@@ -159,6 +156,16 @@ public class GameManager {
 				System.out.println("Logic stop");
 			}
 		}
+	}
+	
+	private void resetQueue() {
+		this.turnQueue.clear();
+		this.animList.clear();
+		this.exitAnimList.clear();
+		archer.resetTurnCount();
+		wizard.resetTurnCount();
+		warrior.resetTurnCount();
+		System.out.println("Queue Clear = " + turnQueue.size());
 	}
 
 	// Getters and Setters
