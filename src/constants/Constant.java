@@ -30,4 +30,9 @@ public class Constant {
 											  {130, 34, 15, 21, 18},
 											  {145, 37, 18, 22, 18}};
 	
+	public static final int queueIconSize = 32;
+	public static final int queueGridSize = 40; // iconsize + padding
+	public static final int queueEntrySpacing = 150; 
+	public static final int queuePushInSpeed = 5; 
+	public static final int queuePushDownSpeed = 10;
 }

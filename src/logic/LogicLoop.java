@@ -1,8 +1,15 @@
 package logic;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.PriorityQueue;
+import java.util.Queue;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+import com.sun.xml.internal.ws.api.pipe.helper.PipeAdapter;
 
 import SharedObject.RenderableHolder;
+import constants.Constant;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
@@ -17,6 +24,8 @@ import sprite.player.Wizard;
 import utilities.AudioPlayer;
 import utilities.QueueExitAnimation;
 import utilities.Random;
+import utilities.cpp;
+import utilities.cpp.Pair;
 
 public class LogicLoop {
 	private static LogicLoop instance = new LogicLoop();
@@ -44,7 +53,8 @@ public class LogicLoop {
 
 	public void update() {
 		RenderableHolder.getInstance().update();
-		updateATB();
+		updateQueue();
+//		updateATB(); // delet this later
 		updateQueueAnim();
 		if (queueCooldown == 0) {
 			callQueue();			
@@ -54,26 +64,75 @@ public class LogicLoop {
 		}
 	}
 	
-	
+	PriorityQueue<Pair<Double, HealthEntity>> temp_q = new PriorityQueue<>();; 
+	public void updateQueue() {
+		ArrayList<Integer> animList = GameManager.getInstance().getAnimList();
+		ArrayList<QueueExitAnimation> exitAnim = GameManager.getInstance().getExitAnimList();
+		Queue<HealthEntity> turnQueue = GameManager.getInstance().getTurnQueue();
+		Iterator<HealthEntity> it = turnQueue.iterator();
+		ArrayList<HealthEntity> deadList = new ArrayList<>(); // deferred removal
+		double pos = 0;
+		for (int i=0; i<animList.size(); ++i) {
+			HealthEntity cur = it.next();
+			if (cur.isDead()) {
+				int last = animList.get(i);
+				animList.remove(i); // remove from queue
+				if (animList.size() > i) { // has index `i`
+					animList.set(i, animList.get(i)+last+Constant.queueGridSize); // make space for next queue
+				}
+				--i;
+				deadList.add(cur); // defer delete
+				exitAnim.add(new QueueExitAnimation(cur, pos+last, 0)); // add remove anim
+			}
+			else {
+				pos += animList.get(i)+Constant.queueGridSize;
+			}
+		}
+		for (HealthEntity d: deadList)
+			turnQueue.remove(d);
+		
+		
+		temp_q.clear();
+		ArrayList<HealthEntity> friends = GameManager.getInstance().getFriends();
+		ArrayList<HealthEntity> enemies = GameManager.getInstance().getEnemies();
+		for (HealthEntity f: friends) {
+			if (f.isDead()) continue;
+			for (int i=1; i<=10; i++) 
+				temp_q.add(new Pair<Double, HealthEntity>(f.getMAXATB()/f.getSpeed()*(f.getTurnCount()+i), f));				
+		}
+		for (HealthEntity e: enemies) {
+			if (e.isDead()) continue; 
+			for (int i=1; i<=10; i++) 
+				temp_q.add(new Pair<Double, HealthEntity>(e.getMAXATB()/e.getSpeed()*(e.getTurnCount()+i), e));
+		}
+		
+		Queue<HealthEntity> q = GameManager.getInstance().getTurnQueue();
+		while (q.size() < 10) { // desired length
+			Pair<Double, HealthEntity> top = temp_q.poll();
+			System.out.printf("top is %s = %.2f\n", top.second.getClass().getSimpleName(), top.first);
+			GameManager.getInstance().addToQueue(top.second);
+			top.second.increaseTurnCount();
+		}
+	}
 	
 	private void updateQueueAnim() {
 		ArrayList<Integer> anim = GameManager.getInstance().getAnimList();
 		for (int i=0; i<anim.size(); ++i) {
 			if (anim.get(i) > 0)
-				anim.set(i, anim.get(i) - 1);
+				anim.set(i, anim.get(i) - Constant.queuePushDownSpeed);
 		}
 		// TODO: change num
 		ArrayList<QueueExitAnimation> exitAnim = GameManager.getInstance().getExitAnimList();
 		for (int i=0; i<exitAnim.size(); ++i) {
 			QueueExitAnimation fp =  exitAnim.get(i);
-			fp.yPos+=3;
+			fp.yPos+=Constant.queuePushDownSpeed;
 			if (fp.yPos > 128) {
 				exitAnim.remove(i);
 				--i;
 			}
 		}
 	}
-
+	/*
 	public void updateATB() {
 		if (!warrior.isATBFull())
 			if (!warrior.isDead()) warrior.setCurrentATB(warrior.getCurrentATB() + (warrior.getSpeed()*.02));
@@ -123,6 +182,7 @@ public class LogicLoop {
 		}
 		
 	}
+	*/
 	
 	public void callQueue() {
 		if (GameManager.getInstance().canCallQueue()) {

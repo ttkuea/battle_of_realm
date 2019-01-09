@@ -17,6 +17,7 @@ public abstract class HealthEntity extends Entity {
 	private final double MAXATB = 100;
 	private double currentATB = 0;
 	private boolean inQueue = false;
+	private int turnCount; // number of turn this has Attacked
 
 	private String name;
 
@@ -148,6 +149,21 @@ public abstract class HealthEntity extends Entity {
 
 	public void setInQueue(boolean inQueue) {
 		this.inQueue = inQueue;
+	}
+	
+	/*
+	 * reset turn count to 0
+	 */
+	public void resetTurnCount() {
+		this.turnCount = 0;
+	}
+
+	public int getTurnCount() {
+		return turnCount;
+	}
+	
+	public int increaseTurnCount() {
+		return ++turnCount;
 	}
 
 }

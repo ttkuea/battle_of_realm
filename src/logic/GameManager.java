@@ -7,6 +7,7 @@ import java.util.Queue;
 import SharedObject.RenderableHolder;
 import constants.Constant;
 import main.Main;
+import skill.Skill;
 import UI.map.Map;
 import UI.map.Map_Stage1;
 import UI.map.Map_Stage2;
@@ -16,6 +17,7 @@ import UI.map.Map_Stage5;
 import UI.map.Map_StageBoss;
 import UI.statusbar.StatusBar;
 import sprite.HealthEntity;
+import sprite.enemy.Enemy;
 import sprite.player.Archer;
 import sprite.player.Warrior;
 import sprite.player.Wizard;
@@ -60,7 +62,7 @@ public class GameManager {
 	public void addToQueue(HealthEntity e) {
 		System.out.println("Queue add " + e.getName());
 		turnQueue.add(e);
-		animList.add(64); // TODO: better value
+		animList.add(Constant.queueEntrySpacing);
 		System.out.println("Queue Size = " + turnQueue.size());
 		e.setInQueue(true);
 	}
@@ -71,8 +73,10 @@ public class GameManager {
 		int last = animList.get(0);
 		animList.remove(0);
 		if (animList.size() > 0)
-			animList.set(0, last+80); // 80 = CHAR_SIZE+16;
+			animList.set(0, last+Constant.queueGridSize );
 		exitAnimList.add(new QueueExitAnimation(character, last, 0));
+		for (Skill skill: character.getSkillList())
+			skill.reduceCooldown();
 		LogicLoop.getInstance().setQueueCooldown(50);
 	}
 
@@ -132,19 +136,14 @@ public class GameManager {
 				LogicLoop.getInstance().setShouldRun(false);
 				System.out.println("Logic stop");
 
-				this.turnQueue.clear();
-				this.animList.clear();
-				this.exitAnimList.clear();
-				System.out.println("Queue Clear = " + turnQueue.size());
-
+				resetQueue();
+				
 				// Update Stats
 				warrior.updateStat(Constant.warriorStat[stageNumber]);
 				wizard.updateStat(Constant.wizardStat[stageNumber]);
 				archer.updateStat(Constant.archerStat[stageNumber]);
 
-				warrior.setInQueue(false);
-				wizard.setInQueue(false);
-				archer.setInQueue(false);
+				
 
 				Main.getGameScreen().setSkillVisible(false);
 
@@ -159,6 +158,16 @@ public class GameManager {
 				System.out.println("Logic stop");
 			}
 		}
+	}
+	
+	private void resetQueue() {
+		this.turnQueue.clear();
+		this.animList.clear();
+		this.exitAnimList.clear();
+		archer.resetTurnCount();
+		wizard.resetTurnCount();
+		warrior.resetTurnCount();
+		System.out.println("Queue Clear = " + turnQueue.size());
 	}
 
 	// Getters and Setters
